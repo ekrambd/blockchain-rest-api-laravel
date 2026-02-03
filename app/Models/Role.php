@@ -5,12 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Wallet extends Model
+class Role extends Model
 {
     use HasFactory;
-
-    public function transactions()
-    {
-    	return $this->hasMany(Transaction::class);
-    }
 }

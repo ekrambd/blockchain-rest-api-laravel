@@ -27,7 +27,7 @@ Route::group(['middleware' => 'prevent-back-history'],function(){
 	Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
-// Route::get('/', function(){
+// Route::get('/do', function(){
 //    $data = array();
 //    $data['name'] = 'Admin';
 //    $data['role_id'] = 1;
