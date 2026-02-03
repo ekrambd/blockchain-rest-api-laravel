@@ -95,7 +95,7 @@ class ApiController extends Controller
 
 
 				if(!$wallet){
-					return response()->json(['status'=>false, 'message'=>'Failed to create wallet', 'wallet'=>new \stdClass()],400);
+					return response()->json(['status'=>false, 'message'=>'Something Went Wrong', 'wallet'=>new \stdClass()],400);
 				}
 
 				$wallet_address = $wallet['address'];
