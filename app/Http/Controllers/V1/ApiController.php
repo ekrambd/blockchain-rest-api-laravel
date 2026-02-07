@@ -182,7 +182,8 @@ class ApiController extends Controller
 		try
 		{
 			$wallet = Wallet::findorfail($id);
-			return $wallet;
+			$wallet->delete();
+			return response()->json(['status'=>true, 'message'=>"Successfully the wallet has been deleted"]);
 		}catch (Exception $e) {
 	        return response()->json([
 	            'status'  => false,
