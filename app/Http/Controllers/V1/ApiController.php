@@ -130,4 +130,66 @@ class ApiController extends Controller
     		return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
     	}
     }
+
+    public function wallets(Request $request)
+	{
+	    try {
+	        $query = Wallet::query();
+
+	        $search = $request->search;
+
+	        if ($request->filled('search')) {
+	            $search = $request->search;
+	            $query->where(function ($q) use ($search) {
+	                $q->where('wallet_name', 'LIKE', "%{$search}%")
+	                  ->orWhere('wallet_address', 'LIKE', "%{$search}%");
+	            });
+	        }
+
+	        if($request->filled('sort_by')){
+	        	$sortBy = $request->sort_by;
+	        	if($sortBy == 'desc'){
+	        		$query->latest();
+	        	}
+	        }
+
+	        $hasPaginate = $request->get('has_paginate', 0);
+
+	        if ($hasPaginate == 1) {
+	            $perPage = $request->get('per_page', 10);
+	            $wallets = $query->paginate($perPage);
+	            return response()->json($wallets);
+	        } else {
+	            $wallets = $query->get();
+	            return response()->json([
+	                'status' => true,
+	                'total'  => $wallets->count(),
+	                'data'   => $wallets
+	            ]);
+	        }
+
+	    } catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function deleteWallet($id)
+	{
+		try
+		{
+			$wallet = Wallet::findorfail($id);
+			return $wallet;
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
 }
