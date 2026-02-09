@@ -193,4 +193,130 @@ class ApiController extends Controller
 	    }
 	}
 
+	public function bnbBalance(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+                'wallet_address' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/bnbBalance.js');
+
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($walletAddress);
+
+			$output = trim(shell_exec($command));
+
+			if($output == null){
+				return response()->json(['status'=>false, 'message'=>'Something Went Wrong', 'data'=>new \stdClass()],404);
+			}
+
+			$data = array('currency'=>'Binance Smart Chain', 'symbol'=>'BNB', 'balance'=>strval($output));
+
+			return response()->json(['status'=>true, 'message'=>'Record Found', 'data'=>$data]);
+
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function polygonBalance(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+                'wallet_address' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/polBalance.js');
+
+			// Pass private key as argument
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($walletAddress);
+
+			$output = trim(shell_exec($command));
+
+
+			if($output == null){
+				return response()->json(['status'=>false, 'message'=>'Something Went Wrong', 'data'=>new \stdClass()],404);
+			}
+
+			$data = array('currency'=>'Polygon', 'symbol'=>'POL', 'balance'=>strval($output));
+
+			return response()->json(['status'=>true, 'message'=>'Record found', 'data'=>$data]);
+
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function ethereumBalance(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+                'wallet_address' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/ethBalance.js');
+
+			// Pass private key as argument
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($walletAddress);
+
+			$output = trim(shell_exec($command));
+
+
+			if($output == null){
+				return response()->json(['status'=>false, 'message'=>'Something Went Wrong', 'data'=>new \stdClass()],404);
+			}
+
+			$data = array('currency'=>'Ethereum', 'symbol'=>'ETH', 'balance'=>strval($output));
+
+			return response()->json(['status'=>true, 'message'=>'Record found', 'data'=>$data]);
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
 }

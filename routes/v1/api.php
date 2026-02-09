@@ -9,4 +9,8 @@ Route::middleware(['throttle:60,1','api.credentials'])->group(function () {
 	Route::post('create-wallet', [ApiController::class, 'createWallet']);
 	Route::get('/wallets', [ApiController::class, 'wallets']);
 	Route::delete('/delete-wallet/{id}', [ApiController::class, 'deleteWallet']);
+	//balance
+	Route::post('bnb-balance', [ApiController::class, 'bnbBalance']);
+	Route::post('polygon-balance', [ApiController::class, 'polygonBalance']);
+	Route::post('ethereum-balance', [ApiController::class, 'ethereumBalance']);
 });

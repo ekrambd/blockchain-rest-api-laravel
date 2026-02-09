@@ -14,3 +14,9 @@ use App\Models\Wallet;
 	// $privateKey = Crypt::decryptString($wallet->private_key);
 	// return $privateKey;
  // }
+
+  function emptyObject()
+  {
+  	  $data = new \stdClass();
+  	  return $data;
+  }
