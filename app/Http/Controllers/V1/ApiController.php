@@ -120,7 +120,7 @@ class ApiController extends Controller
             	'import_by' => $request->import_by,
             	'wallet_type' => $request->wallet_type,
             	'private_key' => $private_key,
-            	'mnemonic' => isset($phrase)?$phrase:$request->mnemonic,
+            	'mnemonic' => isset($phrase)?$phrase:Crypt::encryptString($request->mnemonic),
             	'wallet_address' => $wallet_address,
             ]);
 
@@ -310,6 +310,190 @@ class ApiController extends Controller
 			$data = array('currency'=>'Ethereum', 'symbol'=>'ETH', 'balance'=>strval($output));
 
 			return response()->json(['status'=>true, 'message'=>'Record found', 'data'=>$data]);
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function walletInfoLock(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+                'wallet_id' => 'required|integer|exists:wallets,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $wallet = Wallet::findorfail($request->wallet_id);
+
+            $privateKey = Crypt::decryptString($wallet->private_key);
+            $mnemonic = Crypt::decryptString($wallet->mnemonic);
+
+            $data = array('id'=>$wallet->id, 'wallet_address'=>$wallet->wallet_address, 'private_key'=>$privateKey, 'mnemonic'=>$mnemonic);
+
+            return response()->json(['status'=>true, 'data'=>$data]);
+
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function maxRangeBNB(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+			    'wallet_id'   => 'nullable|integer|exists:wallets,id|required_without_all:private_key,mnemonic',
+			    'private_key' => 'nullable|string|required_without_all:wallet_id,mnemonic',
+			    'mnemonic'    => 'nullable|string|required_without_all:wallet_id,private_key',
+			]);
+
+			if ($validator->fails()) {
+			    return response()->json([
+			        'status' => false,
+			        'message' => 'Please provide at least one: wallet_id, private_key, or mnemonic',
+			        'data' => $validator->errors()
+			    ], 422);
+			}
+
+			if($request->has('wallet_id'))
+			{
+				$wallet = Wallet::findorfail($request->wallet_id);
+				$value = Crypt::decryptString($wallet->private_key);
+			}elseif($request->has('private_key')){
+				$value = $request->private_key;
+			}else{
+				$value = $request->mnemonic;
+			}
+
+			//$walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/bnbRange.js');
+
+			// Pass private key as argument
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($value);
+
+			$output = trim(shell_exec($command));
+
+			$data = json_decode($output,true);
+
+			return response()->json($data);
+
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function maxRangePOL(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+			    'wallet_id'   => 'nullable|integer|exists:wallets,id|required_without_all:private_key,mnemonic',
+			    'private_key' => 'nullable|string|required_without_all:wallet_id,mnemonic',
+			    'mnemonic'    => 'nullable|string|required_without_all:wallet_id,private_key',
+			]);
+
+			if ($validator->fails()) {
+			    return response()->json([
+			        'status' => false,
+			        'message' => 'Please provide at least one: wallet_id, private_key, or mnemonic',
+			        'data' => $validator->errors()
+			    ], 422);
+			}
+
+			if($request->has('wallet_id'))
+			{
+				$wallet = Wallet::findorfail($request->wallet_id);
+				$value = Crypt::decryptString($wallet->private_key);
+			}elseif($request->has('private_key')){
+				$value = $request->private_key;
+			}else{
+				$value = $request->mnemonic;
+			}
+
+			//$walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/polRange.js');
+
+			// Pass private key as argument
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($value);
+
+			$output = trim(shell_exec($command));
+
+			$data = json_decode($output,true);
+
+			return response()->json($data);
+
+		}catch (Exception $e) {
+	        return response()->json([
+	            'status'  => false,
+	            'code'    => $e->getCode(),
+	            'message' => $e->getMessage()
+	        ], 500);
+	    }
+	}
+
+	public function maxRangeETH(Request $request)
+	{
+		try
+		{
+			$validator = Validator::make($request->all(), [
+			    'wallet_id'   => 'nullable|integer|exists:wallets,id|required_without_all:private_key,mnemonic',
+			    'private_key' => 'nullable|string|required_without_all:wallet_id,mnemonic',
+			    'mnemonic'    => 'nullable|string|required_without_all:wallet_id,private_key',
+			]);
+
+			if ($validator->fails()) {
+			    return response()->json([
+			        'status' => false,
+			        'message' => 'Please provide at least one: wallet_id, private_key, or mnemonic',
+			        'data' => $validator->errors()
+			    ], 422);
+			}
+
+			if($request->has('wallet_id'))
+			{
+				$wallet = Wallet::findorfail($request->wallet_id);
+				$value = Crypt::decryptString($wallet->private_key);
+			}elseif($request->has('private_key')){
+				$value = $request->private_key;
+			}else{
+				$value = $request->mnemonic;
+			}
+
+			//$walletAddress = $request->wallet_address;
+
+            $scriptPath = public_path('web3/ethRange.js');
+
+			// Pass private key as argument
+			$command = "node " . escapeshellarg($scriptPath) . " " . escapeshellarg($value);
+
+			$output = trim(shell_exec($command));
+
+			$data = json_decode($output,true);
+
+			return response()->json($data);
+
 		}catch (Exception $e) {
 	        return response()->json([
 	            'status'  => false,
